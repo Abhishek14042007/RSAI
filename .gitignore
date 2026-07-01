@@ -1,0 +1,48 @@
+# Python
+backend/venv/
+backend/.env
+
+# Python cache
+**/__pycache__/
+**/*.py[cod]
+
+# Uploads
+backend/uploads/
+
+# Node
+frontend/node_modules/
+frontend/.expo/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+
+# Virtual Environment
+backend/venv/
+
+# Environment Variables
+backend/.env
+
+# Uploads
+backend/uploads/
+
+# Node
+frontend/node_modules/
+frontend/.expo/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Claude AI
+frontend/.claude/
+frontend/AGENTS.md
+frontend/CLAUDE.md
