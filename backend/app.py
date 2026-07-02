@@ -1,4 +1,4 @@
-from routes import auth_bp
+from routes import auth_bp, resources_bp
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -8,7 +8,8 @@ from config import Config
 from database.db import db
 
 # Import models
-from models import User
+from models.user import User
+from models.resource import Resource
 
 # Import routes
 from routes.auth import auth_bp
@@ -26,6 +27,7 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(resources_bp, url_prefix="/api/resources")
 
 
 @app.route("/")
@@ -37,4 +39,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

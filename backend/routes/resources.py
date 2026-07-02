@@ -1,0 +1,57 @@
+from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+from services.resource_service import ResourceService
+from services.cloudinary_service import CloudinaryService
+from utils.response import success_response, error_response
+
+resources_bp = Blueprint("resources", __name__)
+
+
+@resources_bp.route("/upload", methods=["POST"])
+@jwt_required()
+def upload_resource():
+
+    print("FORM:", request.form)
+    print("FILES:", request.files)
+
+    title = request.form.get("title")
+    description = request.form.get("description")
+    subject = request.form.get("subject")
+    semester = request.form.get("semester")
+    department = request.form.get("department")
+    tags = request.form.get("tags")
+
+    pdf = request.files.get("pdf")
+
+    if not pdf:
+        return error_response("PDF file is required")
+
+    pdf_url = CloudinaryService.upload_pdf(pdf)
+
+    resource = ResourceService.create_resource(
+        title=title,
+        description=description,
+        subject=subject,
+        semester=semester,
+        department=department,
+        tags=tags,
+        pdf_url=pdf_url,
+        thumbnail_url=None,
+        uploaded_by=get_jwt_identity()
+    )
+
+    return success_response(
+        "Resource uploaded successfully",
+        resource.to_dict(),
+        201
+    )
+@resources_bp.route("/", methods=["GET"])
+def get_resources():
+
+    resources = ResourceService.get_all_resources()
+
+    return success_response(
+        "Resources fetched successfully",
+        [resource.to_dict() for resource in resources]
+    )
