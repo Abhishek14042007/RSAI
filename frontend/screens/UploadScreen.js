@@ -29,6 +29,7 @@ export default function UploadScreen() {
 
         if (!result.canceled) {
             setPdf(result.assets[0]);
+            console.log(result.assets[0]);
         }
     };
     const handleUpload = async () => {

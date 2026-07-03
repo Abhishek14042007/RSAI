@@ -1,14 +1,5 @@
-import cloudinary
+import os
 import cloudinary.uploader
-
-from config import Config
-
-cloudinary.config(
-    cloud_name=Config.CLOUDINARY_CLOUD_NAME,
-    api_key=Config.CLOUDINARY_API_KEY,
-    api_secret=Config.CLOUDINARY_API_SECRET,
-    secure=True
-)
 
 
 class CloudinaryService:
@@ -16,11 +7,19 @@ class CloudinaryService:
     @staticmethod
     def upload_pdf(file):
 
+        filename = file.filename.replace("%20", " ")
+
         result = cloudinary.uploader.upload(
-            file,
+            file.stream,
             resource_type="raw",
-            folder="rsai/resources"
+            folder="rsai/resources",
+            filename=filename,
+            use_filename=True,
+            unique_filename=False,
+            overwrite=True,
         )
+
+        print(result)
 
         return result["secure_url"]
 

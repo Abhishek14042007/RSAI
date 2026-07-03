@@ -23,6 +23,8 @@ def upload_resource():
     tags = request.form.get("tags")
 
     pdf = request.files.get("pdf")
+    print(pdf.filename)
+    print(pdf.content_type)
 
     if not pdf:
         return error_response("PDF file is required")

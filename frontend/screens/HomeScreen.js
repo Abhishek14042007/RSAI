@@ -1,17 +1,63 @@
+import { useEffect, useState } from "react";
+
 import {
+    ActivityIndicator,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
-    TouchableOpacity
+    TouchableOpacity,
 } from "react-native";
 
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
+import { getResources } from "../services/resourceService";
 
 export default function HomeScreen({ navigation }) {
+
+    const [resources, setResources] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchResources = async () => {
+        try {
+
+            const response = await getResources();
+
+            setResources(response.data);
+
+        } catch (error) {
+
+            console.log(error);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+    const openPDF = async (url) => {
+        try {
+            const supported = await Linking.canOpenURL(url);
+
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                alert("Unable to open PDF.");
+            }
+        } catch (error) {
+            console.log(error);
+            alert("Unable to open PDF.");
+        }
+    };
+
+    useEffect(() => {
+        fetchResources();
+    }, []);
+
     return (
         <ScrollView style={styles.container}>
+
             <Text style={styles.heading}>
                 Welcome 👋
             </Text>
@@ -27,21 +73,10 @@ export default function HomeScreen({ navigation }) {
             />
 
             <TouchableOpacity
-                style={{
-                    backgroundColor: COLORS.primary,
-                    padding: 14,
-                    borderRadius: 10,
-                    marginBottom: 20,
-                }}
+                style={styles.uploadButton}
                 onPress={() => navigation.navigate("Upload")}
             >
-                <Text
-                    style={{
-                        color: "white",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                    }}
-                >
+                <Text style={styles.uploadButtonText}>
                     Upload Resource
                 </Text>
             </TouchableOpacity>
@@ -50,31 +85,40 @@ export default function HomeScreen({ navigation }) {
                 Latest Resources
             </Text>
 
-            <ResourceCard
-                title="DBMS Notes"
-                uploader="Alumni"
-                likes={15}
-                comments={4}
-            />
+            {loading ? (
 
-            <ResourceCard
-                title="Operating System Lab"
-                uploader="Student"
-                likes={9}
-                comments={2}
-            />
+                <ActivityIndicator
+                    size="large"
+                    color={COLORS.primary}
+                />
 
-            <ResourceCard
-                title="Python Interview Questions"
-                uploader="Faculty"
-                likes={22}
-                comments={8}
-            />
+            ) : resources.length === 0 ? (
+
+                <Text style={styles.emptyText}>
+                    No resources available.
+                </Text>
+
+            ) : (
+
+                resources.map((resource) => (
+                    <ResourceCard
+                        key={resource.id}
+                        title={resource.title}
+                        uploader={`User ${resource.uploaded_by}`}
+                        likes={resource.likes}
+                        comments={0}
+                        onPress={() => openPDF(resource.pdf_url)}
+                    />
+                ))
+
+            )}
+
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
@@ -103,10 +147,31 @@ const styles = StyleSheet.create({
         marginBottom: 25,
     },
 
+    uploadButton: {
+        backgroundColor: COLORS.primary,
+        padding: 14,
+        borderRadius: 10,
+        marginBottom: 20,
+    },
+
+    uploadButtonText: {
+        color: "white",
+        textAlign: "center",
+        fontWeight: "bold",
+    },
+
     section: {
         color: COLORS.white,
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 15,
     },
+
+    emptyText: {
+        color: COLORS.text,
+        textAlign: "center",
+        marginTop: 20,
+        fontSize: 16,
+    },
+
 });
