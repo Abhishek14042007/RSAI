@@ -7,6 +7,7 @@ export default function ResourceCard({
     uploader,
     likes,
     comments,
+    onLike,
     onPress,
 }) {
     return (
@@ -18,10 +19,19 @@ export default function ResourceCard({
             </Text>
 
             <View style={styles.row}>
-                <View style={styles.iconRow}>
-                    <Ionicons name="heart" size={18} color="#EF4444" />
-                    <Text style={styles.count}>{likes}</Text>
-                </View>
+                <TouchableOpacity
+                    style={styles.iconRow}
+                    onPress={onLike}
+                >
+                    <Ionicons
+                        name="heart"
+                        size={18}
+                        color="#EF4444"
+                    />
+                    <Text style={styles.count}>
+                        {likes}
+                    </Text>
+                </TouchableOpacity>
 
                 <View style={styles.iconRow}>
                     <Ionicons name="chatbubble" size={18} color="#38BDF8" />

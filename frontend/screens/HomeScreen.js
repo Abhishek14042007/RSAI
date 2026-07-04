@@ -12,7 +12,7 @@ import {
 
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
-import { getResources } from "../services/resourceService";
+import { getResources, likeResource, } from "../services/resourceService";
 
 export default function HomeScreen({ navigation }) {
 
@@ -49,6 +49,21 @@ export default function HomeScreen({ navigation }) {
             console.log(error);
             alert("Unable to open PDF.");
         }
+    };
+    const handleLike = async (resourceId) => {
+
+        try {
+
+            await likeResource(resourceId);
+
+            fetchResources();
+
+        } catch (error) {
+
+            console.log(error.response?.data);
+
+        }
+
     };
 
     useEffect(() => {
@@ -107,7 +122,12 @@ export default function HomeScreen({ navigation }) {
                         uploader={`User ${resource.uploaded_by}`}
                         likes={resource.likes}
                         comments={0}
-                        onPress={() => openPDF(resource.pdf_url)}
+                        onPress={() =>
+                            navigation.navigate("ResourceDetails", {
+                                resource: resource,
+                            })
+                        }
+                        onLike={() => handleLike(resource.id)}
                     />
                 ))
 

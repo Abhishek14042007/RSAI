@@ -1,3 +1,5 @@
+from database.db import db
+from services.resource_service import ResourceService
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -57,3 +59,23 @@ def get_resources():
         "Resources fetched successfully",
         [resource.to_dict() for resource in resources]
     )
+@resources_bp.route("/<int:resource_id>/like", methods=["POST"])
+def like_resource(resource_id):
+
+    resource = ResourceService.get_resource(resource_id)
+
+    if not resource:
+        return {
+            "success": False,
+            "message": "Resource not found"
+        }, 404
+
+    resource.likes += 1
+
+    db.session.commit()
+
+    return {
+        "success": True,
+        "message": "Resource liked",
+        "likes": resource.likes
+    }, 200
