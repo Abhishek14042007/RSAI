@@ -44,6 +44,13 @@ class Resource(db.Model):
         default=datetime.utcnow
     )
 
+    comments = db.relationship(
+    "Comment",
+    backref="resource",
+    lazy=True,
+    cascade="all, delete"
+    )
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -58,5 +65,6 @@ class Resource(db.Model):
             "uploaded_by": self.uploaded_by,
             "downloads": self.downloads,
             "likes": self.likes,
+            "comments": len(self.comments),
             "created_at": self.created_at.isoformat()
         }

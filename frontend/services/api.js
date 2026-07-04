@@ -1,6 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-// Change this to your computer's IPv4 address
 const API_BASE_URL = "http://10.78.133.254:5000/api";
 
 const api = axios.create({
@@ -10,5 +10,22 @@ const api = axios.create({
         "Content-Type": "application/json",
     },
 });
+
+api.interceptors.request.use(
+    async (config) => {
+
+        const token = await AsyncStorage.getItem("token");
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        return config;
+
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export default api;

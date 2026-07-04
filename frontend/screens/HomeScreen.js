@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
 import {
     ActivityIndicator,
     Linking,
@@ -9,7 +9,6 @@ import {
     TextInput,
     TouchableOpacity,
 } from "react-native";
-
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
 import { getResources, likeResource, } from "../services/resourceService";
@@ -66,9 +65,11 @@ export default function HomeScreen({ navigation }) {
 
     };
 
-    useEffect(() => {
-        fetchResources();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            fetchResources();
+        }, [])
+    );
 
     return (
         <ScrollView style={styles.container}>
@@ -121,7 +122,7 @@ export default function HomeScreen({ navigation }) {
                         title={resource.title}
                         uploader={`User ${resource.uploaded_by}`}
                         likes={resource.likes}
-                        comments={0}
+                        comments={resource.comments}
                         onPress={() =>
                             navigation.navigate("ResourceDetails", {
                                 resource: resource,

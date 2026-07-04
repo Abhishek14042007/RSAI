@@ -35,6 +35,13 @@ class User(db.Model):
         onupdate=datetime.utcnow
     )
 
+    comments = db.relationship(
+    "Comment",
+    backref="user",
+    lazy=True,
+    cascade="all, delete"
+    )
+    
     def to_dict(self):
         return {
             "id": self.id,

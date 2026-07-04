@@ -1,18 +1,51 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
     Linking,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 
 import COLORS from "../constants/colors";
+import { addComment, getComments } from "../services/commentService";
 
 export default function ResourceDetails({ navigation, route }) {
 
     const { resource } = route.params;
+    const [comments, setComments] = useState([]);
+    const [commentText, setCommentText] = useState("");
+
+    const loadComments = async () => {
+        try {
+            const response = await getComments(resource.id);
+            setComments(response.comments);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleComment = async () => {
+        if (!commentText.trim()) return;
+
+        try {
+            await addComment(resource.id, commentText);
+
+            setCommentText("");
+
+            loadComments();
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        loadComments();
+    }, []);
 
     const openPDF = async () => {
         try {
@@ -167,25 +200,50 @@ export default function ResourceDetails({ navigation, route }) {
                 {/* Description */}
 
                 <Text style={styles.sectionTitle}>
-                    Description
+                    Comments
                 </Text>
 
                 <View style={styles.card}>
 
-                    <Text style={styles.description}>
+                    {comments.length === 0 ? (
+                        <Text style={styles.commentSub}>
+                            No comments yet.
+                        </Text>
+                    ) : (
+                        comments.map((comment) => (
+                            <View
+                                key={comment.id}
+                                style={styles.commentItem}
+                            >
+                                <Text style={styles.commentUser}>
+                                    User {comment.user_id}
+                                </Text>
 
-                        {resource.description ||
-                            "No description available."}
+                                <Text style={styles.commentContent}>
+                                    {comment.content}
+                                </Text>
+                            </View>
+                        ))
+                    )}
 
-                    </Text>
+                    <TextInput
+                        value={commentText}
+                        onChangeText={setCommentText}
+                        placeholder="Write a comment..."
+                        placeholderTextColor="#94A3B8"
+                        style={styles.commentInput}
+                    />
+
+                    <TouchableOpacity
+                        style={styles.commentButton}
+                        onPress={handleComment}
+                    >
+                        <Text style={styles.commentButtonText}>
+                            Post Comment
+                        </Text>
+                    </TouchableOpacity>
 
                 </View>
-
-                {/* Information */}
-
-                <Text style={styles.sectionTitle}>
-                    Resource Information
-                </Text>
 
                 <View style={styles.card}>
 
@@ -523,6 +581,45 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginLeft: 10,
+    },
+
+    commentItem: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#2E3A59",
+        paddingBottom: 12,
+        marginBottom: 12,
+    },
+
+    commentUser: {
+        color: COLORS.primary,
+        fontWeight: "bold",
+        marginBottom: 5,
+    },
+
+    commentContent: {
+        color: COLORS.white,
+        fontSize: 15,
+    },
+
+    commentInput: {
+        backgroundColor: COLORS.background,
+        color: COLORS.white,
+        borderRadius: 12,
+        padding: 14,
+        marginTop: 15,
+    },
+
+    commentButton: {
+        backgroundColor: COLORS.primary,
+        marginTop: 15,
+        padding: 14,
+        borderRadius: 12,
+    },
+
+    commentButtonText: {
+        color: COLORS.white,
+        textAlign: "center",
+        fontWeight: "bold",
     },
 
 });
