@@ -1,5 +1,5 @@
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Linking,
@@ -8,20 +8,22 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    View,
 } from "react-native";
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
-import { getResources, likeResource, } from "../services/resourceService";
+import { likeResource, searchResources } from "../services/resourceService";
 
 export default function HomeScreen({ navigation }) {
 
     const [resources, setResources] = useState([]);
+    const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
 
     const fetchResources = async () => {
         try {
 
-            const response = await getResources();
+            const response = await searchResources(search);
 
             setResources(response.data);
 
@@ -65,26 +67,48 @@ export default function HomeScreen({ navigation }) {
 
     };
 
-    useFocusEffect(
-        useCallback(() => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
             fetchResources();
-        }, [])
-    );
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
 
     return (
         <ScrollView style={styles.container}>
 
-            <Text style={styles.heading}>
-                Welcome 👋
-            </Text>
+            <View style={styles.header}>
 
-            <Text style={styles.subtitle}>
-                Find and share study resources
-            </Text>
+                <View>
+                    <Text style={styles.heading}>
+                        Welcome 👋
+                    </Text>
+
+                    <Text style={styles.subtitle}>
+                        Find and share study resources
+                    </Text>
+                </View>
+
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Profile")}
+                >
+                    <Ionicons
+                        name="person-circle"
+                        size={42}
+                        color={COLORS.primary}
+                    />
+                </TouchableOpacity>
+
+            </View>
 
             <TextInput
                 placeholder="Search resources..."
                 placeholderTextColor="#94A3B8"
+                value={search}
+                onChangeText={setSearch}
+                onSubmitEditing={fetchResources}
                 style={styles.search}
             />
 
@@ -146,11 +170,18 @@ const styles = StyleSheet.create({
         padding: 20,
     },
 
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 20,
+        marginBottom: 25,
+    },
+
     heading: {
         color: COLORS.white,
         fontSize: 30,
         fontWeight: "bold",
-        marginTop: 20,
     },
 
     subtitle: {

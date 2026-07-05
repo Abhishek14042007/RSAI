@@ -43,3 +43,17 @@ class ResourceService:
     @staticmethod
     def get_resource(resource_id):
         return Resource.query.get(resource_id)
+    
+    @staticmethod
+    def search_resources(search):
+    
+        if not search:
+            return Resource.query.order_by(
+                Resource.created_at.desc()
+            ).all()
+    
+        return Resource.query.filter(
+            Resource.title.ilike(f"%{search}%")
+        ).order_by(
+            Resource.created_at.desc()
+        ).all()

@@ -9,3 +9,15 @@ export const likeResource = async (resourceId) => {
     const response = await api.post(`/resources/${resourceId}/like`);
     return response.data;
 };
+
+export const searchResources = async (search) => {
+
+    const response = await api.get("/resources", {
+        params: {
+            search,
+        },
+    });
+
+    return response.data;
+
+};

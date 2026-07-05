@@ -65,3 +65,5 @@ class AuthService:
         db.session.commit()
 
         return user
+    
+    

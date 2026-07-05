@@ -5,6 +5,10 @@ from services.auth_service import AuthService
 from utils.validators import is_valid_email, is_strong_password
 from utils.response import success_response, error_response
 
+from services.cloudinary_service import CloudinaryService
+from database.db import db
+from models.user import User
+
 auth_bp = Blueprint("auth", __name__)
 
 
@@ -93,9 +97,70 @@ def profile():
 
     user_id = get_jwt_identity()
 
+    from models.user import User
+
+    user = User.query.get(int(user_id))
+
+    if not user:
+        return error_response("User not found", 404)
+
     return success_response(
         "Profile fetched successfully",
+        user.to_dict()
+    )
+
+@auth_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+
+    user_id = get_jwt_identity()
+
+    from models.user import User
+    from database.db import db
+
+    user = User.query.get(int(user_id))
+
+    if not user:
+        return error_response("User not found", 404)
+
+    data = request.get_json()
+
+    user.full_name = data.get("full_name", user.full_name)
+    user.bio = data.get("bio", user.bio)
+    user.department = data.get("department", user.department)
+    user.semester = data.get("semester", user.semester)
+
+    db.session.commit()
+
+    return success_response(
+        "Profile updated successfully",
+        user.to_dict()
+    )
+@auth_bp.route("/profile-picture", methods=["POST"])
+@jwt_required()
+def update_profile_picture():
+
+    user_id = get_jwt_identity()
+
+    user = User.query.get(int(user_id))
+
+    if not user:
+        return error_response("User not found", 404)
+
+    image = request.files.get("image")
+
+    if not image:
+        return error_response("Image is required")
+
+    image_url = CloudinaryService.upload_image(image)
+
+    user.profile_picture = image_url
+
+    db.session.commit()
+
+    return success_response(
+        "Profile picture updated successfully",
         {
-            "user_id": user_id
+            "profile_picture": image_url
         }
     )

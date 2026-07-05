@@ -53,7 +53,9 @@ def upload_resource():
 @resources_bp.route("/", methods=["GET"])
 def get_resources():
 
-    resources = ResourceService.get_all_resources()
+    search = request.args.get("search", "")
+
+    resources = ResourceService.search_resources(search)
 
     return success_response(
         "Resources fetched successfully",
