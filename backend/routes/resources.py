@@ -61,6 +61,24 @@ def get_resources():
         "Resources fetched successfully",
         [resource.to_dict() for resource in resources]
     )
+
+@resources_bp.route("/my-uploads", methods=["GET"])
+@jwt_required()
+def my_uploads():
+
+    user_id = int(get_jwt_identity())
+
+    print("JWT USER:", user_id)
+
+    resources = ResourceService.get_user_resources(user_id)
+
+    print("FOUND:", len(resources))
+
+    return success_response(
+        "Resources fetched successfully",
+        [resource.to_dict() for resource in resources]
+    )
+    
 @resources_bp.route("/<int:resource_id>/like", methods=["POST"])
 def like_resource(resource_id):
 
@@ -81,3 +99,42 @@ def like_resource(resource_id):
         "message": "Resource liked",
         "likes": resource.likes
     }, 200
+
+@resources_bp.route("/<int:resource_id>", methods=["DELETE"])
+@jwt_required()
+def delete_resource(resource_id):
+
+    user_id = int(get_jwt_identity())
+
+    resource = ResourceService.delete_resource(
+        resource_id,
+        user_id
+    )
+
+    if not resource:
+        return error_response(
+            "Resource not found",
+            404
+        )
+
+    return success_response(
+        "Resource deleted successfully"
+    )
+
+@resources_bp.route("/<int:resource_id>/download", methods=["POST"])
+def download_resource(resource_id):
+
+    resource = ResourceService.increment_download(resource_id)
+
+    if not resource:
+        return error_response(
+            "Resource not found",
+            404
+        )
+
+    return success_response(
+        "Download counted",
+        {
+            "pdf_url": resource.pdf_url
+        }
+    )

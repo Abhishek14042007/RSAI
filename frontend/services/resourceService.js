@@ -21,3 +21,32 @@ export const searchResources = async (search) => {
     return response.data;
 
 };
+
+export const getMyUploads = async () => {
+
+    const response = await api.get(
+        "/resources/my-uploads"
+    );
+
+    return response.data;
+
+};
+
+export const deleteResource = async (resourceId) => {
+
+    const response = await api.delete(
+        `/resources/${resourceId}`
+    );
+
+    return response.data;
+
+};
+export const downloadResource = async (resourceId) => {
+
+    const response = await api.post(
+        `/resources/${resourceId}/download`
+    );
+
+    return response.data;
+
+};

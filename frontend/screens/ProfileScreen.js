@@ -14,20 +14,24 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-
 import COLORS from "../constants/colors";
+import {
+    deleteResource,
+    getMyUploads,
+} from "../services/resourceService";
 
 import {
     getProfile,
     updateProfile,
     uploadProfilePicture,
 } from "../services/authService";
-
 export default function ProfileScreen() {
 
     const [user, setUser] = useState(null);
 
     const [loading, setLoading] = useState(true);
+
+    const [myUploads, setMyUploads] = useState([]);
 
     const loadProfile = async () => {
 
@@ -36,6 +40,12 @@ export default function ProfileScreen() {
             const response = await getProfile();
 
             setUser(response.data);
+
+            const uploads = await getMyUploads();
+
+            console.log("UPLOADS RESPONSE:", uploads);
+
+            setMyUploads(uploads.data);
 
 
         } catch (error) {
@@ -47,6 +57,45 @@ export default function ProfileScreen() {
             setLoading(false);
 
         }
+
+    };
+    const handleDelete = (resourceId) => {
+
+        Alert.alert(
+            "Delete Resource",
+            "Are you sure you want to delete this resource?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+
+                        try {
+
+                            await deleteResource(resourceId);
+
+                            loadProfile();
+
+                        } catch (error) {
+
+                            console.log("DELETE ERROR:", error.response?.data);
+                            console.log(error);
+
+                            Alert.alert(
+                                "Error",
+                                error.response?.data?.message || "Unable to delete resource."
+                            );
+
+                        }
+
+                    },
+                },
+            ]
+        );
 
     };
 
@@ -299,6 +348,51 @@ export default function ProfileScreen() {
                             {user.email}
                         </Text>
                     </View>
+                    <View style={styles.uploadSection}>
+
+                        <Text style={styles.infoHeading}>
+                            My Uploads
+                        </Text>
+
+                        {myUploads.length === 0 ? (
+
+                            <Text style={styles.emptyUpload}>
+                                You haven't uploaded any resources yet.
+                            </Text>
+
+                        ) : (
+
+                            myUploads.map((item) => (
+
+                                <View
+                                    key={item.id}
+                                    style={styles.uploadCard}
+                                >
+
+                                    <Text style={styles.uploadTitle}>
+                                        {item.title}
+                                    </Text>
+
+                                    <Text style={styles.uploadStats}>
+                                        ❤️ {item.likes}     📥 {item.downloads}
+                                    </Text>
+
+                                    <TouchableOpacity
+                                        style={styles.deleteButton}
+                                        onPress={() => handleDelete(item.id)}
+                                    >
+                                        <Text style={styles.deleteText}>
+                                            Delete
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                </View>
+
+                            ))
+
+                        )}
+
+                    </View>
 
                 </View>
 
@@ -442,6 +536,46 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontSize: 17,
         marginTop: 4,
+    },
+
+    uploadSection: {
+        marginTop: 30,
+    },
+
+    uploadCard: {
+        backgroundColor: COLORS.card,
+        padding: 15,
+        borderRadius: 12,
+        marginTop: 12,
+    },
+
+    uploadTitle: {
+        color: COLORS.white,
+        fontSize: 17,
+        fontWeight: "bold",
+    },
+
+    uploadStats: {
+        color: COLORS.text,
+        marginTop: 8,
+    },
+
+    emptyUpload: {
+        color: COLORS.text,
+        marginTop: 10,
+    },
+
+    deleteButton: {
+        marginTop: 12,
+        backgroundColor: "#DC2626",
+        padding: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+
+    deleteText: {
+        color: "white",
+        fontWeight: "bold",
     },
 
 });

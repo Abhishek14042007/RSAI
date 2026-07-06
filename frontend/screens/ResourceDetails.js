@@ -1,6 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import { useEffect, useState } from "react";
 import {
+    Alert,
     Linking,
     ScrollView,
     StyleSheet,
@@ -9,10 +12,10 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
+import { downloadResource } from "../services/resourceService";
 
 import COLORS from "../constants/colors";
 import { addComment, getComments } from "../services/commentService";
-
 export default function ResourceDetails({ navigation, route }) {
 
     const { resource } = route.params;
@@ -42,6 +45,46 @@ export default function ResourceDetails({ navigation, route }) {
             console.log(error);
         }
     };
+    const handleDownload = async () => {
+
+        try {
+
+            const response = await downloadResource(resource.id);
+
+            const fileUri =
+                FileSystem.documentDirectory +
+                `${resource.title}.pdf`;
+
+            await FileSystem.downloadAsync(
+                response.data.pdf_url,
+                fileUri
+            );
+
+            if (await Sharing.isAvailableAsync()) {
+
+                await Sharing.shareAsync(fileUri);
+
+            } else {
+
+                Alert.alert(
+                    "Downloaded",
+                    `File saved at:\n${fileUri}`
+                );
+
+            }
+
+        } catch (error) {
+
+            console.log(error);
+
+            Alert.alert(
+                "Error",
+                "Unable to download PDF."
+            );
+
+        }
+
+    };
 
     useEffect(() => {
         loadComments();
@@ -64,6 +107,7 @@ export default function ResourceDetails({ navigation, route }) {
 
         }
     };
+
 
     const tags =
         resource.tags && resource.tags.length > 0
@@ -348,32 +392,33 @@ export default function ResourceDetails({ navigation, route }) {
 
                     </View>
 
-                    <Text style={styles.commentSub}>
-                        Comments feature coming soon...
-                    </Text>
-
                 </View>
 
                 <View style={{ height: 120 }} />
 
             </ScrollView>
 
-            <TouchableOpacity
-                style={styles.openButton}
-                onPress={openPDF}
-            >
+            <View style={styles.buttonRow}>
 
-                <Ionicons
-                    name="document-text"
-                    size={22}
-                    color="white"
-                />
+                <TouchableOpacity
+                    style={styles.openButton}
+                    onPress={openPDF}
+                >
+                    <Text style={styles.buttonText}>
+                        Open PDF
+                    </Text>
+                </TouchableOpacity>
 
-                <Text style={styles.openText}>
-                    Open PDF
-                </Text>
+                <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={handleDownload}
+                >
+                    <Text style={styles.buttonText}>
+                        Download
+                    </Text>
+                </TouchableOpacity>
 
-            </TouchableOpacity>
+            </View>
 
         </View>
 
@@ -480,6 +525,38 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 
+    buttonRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 20,
+    },
+
+    openButton: {
+        flex: 1,
+        backgroundColor: COLORS.primary,
+        padding: 15,
+        borderRadius: 12,
+        alignItems: "center",
+        marginRight: 8,
+    },
+
+    downloadButton: {
+        flex: 1,
+        backgroundColor: COLORS.card,
+        borderWidth: 1,
+        borderColor: COLORS.primary,
+        padding: 15,
+        borderRadius: 12,
+        alignItems: "center",
+        marginLeft: 8,
+    },
+
+    buttonText: {
+        color: COLORS.white,
+        fontWeight: "bold",
+        fontSize: 15,
+    },
+
     statLabel: {
         color: COLORS.text,
         marginTop: 6,
@@ -562,19 +639,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 
-    openButton: {
-        position: "absolute",
-        left: 20,
-        right: 20,
-        bottom: 20,
-        backgroundColor: COLORS.primary,
-        borderRadius: 18,
-        padding: 18,
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        elevation: 8,
-    },
+
 
     openText: {
         color: COLORS.white,

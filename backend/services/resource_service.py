@@ -57,3 +57,42 @@ class ResourceService:
         ).order_by(
             Resource.created_at.desc()
         ).all()
+
+    @staticmethod
+    def get_user_resources(user_id):
+    
+        return Resource.query.filter_by(
+            uploaded_by=user_id
+        ).order_by(
+            Resource.created_at.desc()
+        ).all()
+
+    @staticmethod
+    def delete_resource(resource_id, user_id):
+    
+        resource = Resource.query.filter_by(
+            id=resource_id,
+            uploaded_by=user_id
+        ).first()
+    
+        if not resource:
+            return None
+    
+        db.session.delete(resource)
+        db.session.commit()
+    
+        return resource
+    
+    @staticmethod
+    def increment_download(resource_id):
+    
+        resource = Resource.query.get(resource_id)
+    
+        if not resource:
+            return None
+    
+        resource.downloads += 1
+    
+        db.session.commit()
+    
+        return resource

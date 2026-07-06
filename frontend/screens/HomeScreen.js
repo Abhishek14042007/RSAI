@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Linking,
@@ -66,6 +67,14 @@ export default function HomeScreen({ navigation }) {
         }
 
     };
+
+    useFocusEffect(
+        useCallback(() => {
+
+            fetchResources();
+
+        }, [])
+    );
 
     useEffect(() => {
         const timer = setTimeout(() => {
