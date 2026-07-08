@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import CommunityScreen from "../screens/CommunityScreen";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -29,6 +30,10 @@ export default function AppNavigator() {
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="ResourceDetails" component={ResourceDetails} />
                 <Stack.Screen name="Search" component={SearchScreen} />
+                <Stack.Screen
+                    name="Community"
+                    component={CommunityScreen}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

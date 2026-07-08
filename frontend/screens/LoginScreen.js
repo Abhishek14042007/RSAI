@@ -30,8 +30,12 @@ export default function LoginScreen({ navigation }) {
 
             if (response.success) {
                 await AsyncStorage.setItem("token", response.data.token);
+                await AsyncStorage.setItem(
+                    "user",
+                    JSON.stringify(response.data.user)
+                );
 
-                Alert.alert("Success", response.message);
+                //Alert.alert("Success", response.message);
 
                 navigation.replace("Home");
             } else {

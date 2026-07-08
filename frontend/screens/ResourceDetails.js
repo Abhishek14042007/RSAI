@@ -372,27 +372,7 @@ export default function ResourceDetails({ navigation, route }) {
 
                 {/* Comments */}
 
-                <Text style={styles.sectionTitle}>
-                    Comments
-                </Text>
 
-                <View style={styles.card}>
-
-                    <View style={styles.commentRow}>
-
-                        <Ionicons
-                            name="chatbubble-ellipses"
-                            size={24}
-                            color={COLORS.primary}
-                        />
-
-                        <Text style={styles.commentText}>
-                            No comments yet.
-                        </Text>
-
-                    </View>
-
-                </View>
 
                 <View style={{ height: 120 }} />
 
