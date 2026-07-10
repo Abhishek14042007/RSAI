@@ -1,6 +1,6 @@
 from database.db import db
 from models.resource import Resource
-
+from models.resource_like import ResourceLike
 
 class ResourceService:
 
@@ -92,6 +92,39 @@ class ResourceService:
             return None
     
         resource.downloads += 1
+    
+        db.session.commit()
+    
+        return resource
+    @staticmethod
+    def like_resource(resource_id, user_id):
+    
+        resource = Resource.query.get(resource_id)
+    
+        if not resource:
+            return None
+    
+        # Don't allow liking your own resource
+        if resource.uploaded_by == user_id:
+            return "own_resource"
+    
+        existing_like = ResourceLike.query.filter_by(
+            resource_id=resource_id,
+            user_id=user_id
+        ).first()
+    
+        if existing_like:
+        
+            db.session.delete(existing_like)
+    
+        else:
+        
+            like = ResourceLike(
+                resource_id=resource_id,
+                user_id=user_id
+            )
+    
+            db.session.add(like)
     
         db.session.commit()
     

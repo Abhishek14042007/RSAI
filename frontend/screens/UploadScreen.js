@@ -1,6 +1,8 @@
 import * as DocumentPicker from "expo-document-picker";
 import { useState } from "react";
 import {
+    ActivityIndicator,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -17,8 +19,10 @@ export default function UploadScreen() {
     const [subject, setSubject] = useState("");
     const [semester, setSemester] = useState("");
     const [department, setDepartment] = useState("");
+    const [refreshing, setRefreshing] = useState(false);
 
     const [pdf, setPdf] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
     const pickPDF = async () => {
 
@@ -32,6 +36,15 @@ export default function UploadScreen() {
             console.log(result.assets[0]);
         }
     };
+    const onRefresh = async () => {
+
+        setRefreshing(true);
+
+        await fetchMyUploads();
+
+        setRefreshing(false);
+
+    };
     const handleUpload = async () => {
         if (!pdf) {
             alert("Please choose a PDF.");
@@ -39,6 +52,7 @@ export default function UploadScreen() {
         }
 
         try {
+            setUploading(true);
 
             const formData = new FormData();
 
@@ -69,11 +83,24 @@ export default function UploadScreen() {
             );
 
         }
+        finally {
+
+            setUploading(false);
+
+        }
 
     };
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={COLORS.primary}
+                    colors={[COLORS.primary]}
+                />
+            }>
 
             <Text style={styles.heading}>
                 Upload Resource
@@ -129,12 +156,26 @@ export default function UploadScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-                style={styles.uploadButton}
+                style={[
+                    styles.uploadButton,
+                    uploading && { opacity: 0.7 }
+                ]}
                 onPress={handleUpload}
+                disabled={uploading}
             >
-                <Text style={styles.uploadText}>
-                    Upload
-                </Text>
+                {uploading ? (
+
+                    <ActivityIndicator
+                        color="white"
+                    />
+
+                ) : (
+
+                    <Text style={styles.uploadText}>
+                        Upload
+                    </Text>
+
+                )}
             </TouchableOpacity>
 
         </ScrollView>

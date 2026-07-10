@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +8,7 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -25,13 +27,24 @@ import {
     updateProfile,
     uploadProfilePicture,
 } from "../services/authService";
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
 
     const [user, setUser] = useState(null);
 
     const [loading, setLoading] = useState(true);
 
     const [myUploads, setMyUploads] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+
+        setRefreshing(true);
+
+        await loadProfile();
+
+        setRefreshing(false);
+
+    };
 
     const loadProfile = async () => {
 
@@ -91,6 +104,38 @@ export default function ProfileScreen() {
                             );
 
                         }
+
+                    },
+                },
+            ]
+        );
+
+    };
+    const handleLogout = () => {
+
+        Alert.alert(
+            "Logout",
+            "Are you sure you want to logout?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: async () => {
+
+                        await AsyncStorage.removeItem("token");
+
+                        navigation.reset({
+                            index: 0,
+                            routes: [
+                                {
+                                    name: "Login",
+                                },
+                            ],
+                        });
 
                     },
                 },
@@ -196,7 +241,15 @@ export default function ProfileScreen() {
 
     return (
 
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={COLORS.primary}
+                    colors={[COLORS.primary]}
+                />
+            }>
 
             <TouchableOpacity
                 style={styles.avatar}
@@ -395,6 +448,20 @@ export default function ProfileScreen() {
                     </View>
 
                 </View>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={handleLogout}
+                >
+                    <Ionicons
+                        name="log-out-outline"
+                        size={22}
+                        color="white"
+                    />
+
+                    <Text style={styles.logoutText}>
+                        Logout
+                    </Text>
+                </TouchableOpacity>
 
             </View>
 
@@ -576,6 +643,22 @@ const styles = StyleSheet.create({
     deleteText: {
         color: "white",
         fontWeight: "bold",
+    },
+    logoutButton: {
+        marginTop: 30,
+        backgroundColor: "#DC2626",
+        borderRadius: 12,
+        padding: 15,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    logoutText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 10,
     },
 
 });

@@ -16,6 +16,8 @@ api.interceptors.request.use(
 
         const token = await AsyncStorage.getItem("token");
 
+
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -23,9 +25,7 @@ api.interceptors.request.use(
         return config;
 
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
 export default api;

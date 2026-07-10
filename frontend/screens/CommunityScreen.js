@@ -1,9 +1,15 @@
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import utc from "dayjs/plugin/utc";
 import { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Image,
+    RefreshControl,
     StyleSheet,
     Text,
     TextInput,
@@ -13,11 +19,15 @@ import {
 import {
     addComment,
     createPost,
+    deleteComment,
     deletePost,
     getComments,
     getPosts,
     likePost
 } from "../services/communityService";
+
+dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 import COLORS from "../constants/colors";
 
@@ -33,6 +43,19 @@ export default function CommunityScreen() {
     const [commentText, setCommentText] = useState("");
 
     const [expandedPost, setExpandedPost] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [posting, setPosting] = useState(false);
+    const [sendingComment, setSendingComment] = useState(false);
+
+    const onRefresh = async () => {
+
+        setRefreshing(true);
+
+        await loadPosts();
+
+        setRefreshing(false);
+
+    };
     const loadUser = async () => {
 
         const user = await AsyncStorage.getItem("user");
@@ -75,9 +98,7 @@ export default function CommunityScreen() {
 
         if (!content.trim()) {
 
-            Alert.alert(
-                "Enter something first."
-            );
+            Alert.alert("Enter something first.");
 
             return;
 
@@ -85,20 +106,25 @@ export default function CommunityScreen() {
 
         try {
 
+            setPosting(true);
+
             await createPost(content);
 
             setContent("");
 
-            loadPosts();
+            await loadPosts();
 
         } catch (error) {
 
             console.log(error);
 
+        } finally {
+
+            setPosting(false);
+
         }
 
     };
-
     const handleLike = async (id) => {
 
         await likePost(id);
@@ -151,19 +177,51 @@ export default function CommunityScreen() {
 
     const handleComment = async (postId) => {
 
-        if (!commentText.trim())
+        if (!commentText.trim()) {
             return;
+        }
 
-        await addComment(
-            postId,
-            commentText
-        );
+        try {
 
-        setCommentText("");
+            setSendingComment(true);
 
-        loadComments(postId);
+            await addComment(
+                postId,
+                commentText
+            );
 
-        loadPosts();
+            setCommentText("");
+
+            await loadComments(postId);
+
+            await loadPosts();
+
+        } catch (error) {
+
+            console.log(error);
+
+        } finally {
+
+            setSendingComment(false);
+
+        }
+
+    };
+    const handleDeleteComment = async (commentId, postId) => {
+
+        try {
+
+            await deleteComment(commentId);
+
+
+            loadComments(postId);
+            loadPosts();
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
 
     };
 
@@ -189,15 +247,36 @@ export default function CommunityScreen() {
             />
 
             <TouchableOpacity
-                style={styles.postButton}
+                style={[
+                    styles.postButton,
+                    posting && { opacity: 0.7 }
+                ]}
                 onPress={handleCreate}
+                disabled={posting}
             >
-                <Text style={styles.postText}>
-                    Post
-                </Text>
+                {posting ? (
+
+                    <ActivityIndicator
+                        color="white"
+                    />
+
+                ) : (
+
+                    <Text style={styles.postText}>
+                        Post
+                    </Text>
+
+                )}
             </TouchableOpacity>
 
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={COLORS.primary}
+                    />
+                }
                 data={posts}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
@@ -241,6 +320,9 @@ export default function CommunityScreen() {
                                 <Text style={styles.role}>
                                     {item.user.role}
                                 </Text>
+                                <Text style={styles.time}>
+                                    {dayjs.utc(item.created_at).local().fromNow()}
+                                </Text>
 
                             </View>
 
@@ -256,18 +338,35 @@ export default function CommunityScreen() {
                                 style={styles.actionButton}
                                 onPress={() => handleLike(item.id)}
                             >
-                                <Text style={styles.actionText}>
-                                    ❤️ Like ({item.likes})
-                                </Text>
+                                <View style={styles.iconRow}>
+                                    <Ionicons
+                                        name="heart"
+                                        size={18}
+                                        color="#EF4444"
+                                    />
+
+                                    <Text style={styles.actionText}>
+                                        Like ({item.likes})
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
+
 
                             <TouchableOpacity
                                 style={styles.actionButton}
                                 onPress={() => toggleComments(item.id)}
                             >
-                                <Text style={styles.actionText}>
-                                    💬 Comments ({item.comment_count})
-                                </Text>
+                                <View style={styles.iconRow}>
+                                    <Ionicons
+                                        name="chatbubble"
+                                        size={18}
+                                        color="#FFFFFF"
+                                    />
+
+                                    <Text style={styles.actionText}>
+                                        Comments ({item.comment_count})
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
 
                             {item.user.id === userId && (
@@ -276,9 +375,17 @@ export default function CommunityScreen() {
                                     style={styles.deleteButton}
                                     onPress={() => handleDelete(item.id)}
                                 >
-                                    <Text style={styles.deleteText}>
-                                        🗑 Delete
-                                    </Text>
+                                    <View style={styles.iconRow}>
+                                        <MaterialIcons
+                                            name="delete"
+                                            size={18}
+                                            color="white"
+                                        />
+
+                                        <Text style={styles.deleteText}>
+                                            Delete
+                                        </Text>
+                                    </View>
                                 </TouchableOpacity>
 
                             )}
@@ -296,9 +403,53 @@ export default function CommunityScreen() {
                                         style={styles.commentCard}
                                     >
 
-                                        <Text style={styles.commentName}>
-                                            {comment.user.name}
-                                        </Text>
+                                        <View style={styles.commentHeader}>
+
+                                            <View style={styles.commentUser}>
+
+                                                <Image
+                                                    source={{
+                                                        uri:
+                                                            comment.user.avatar ||
+                                                            "https://ui-avatars.com/api/?name=User"
+                                                    }}
+                                                    style={styles.commentAvatar}
+                                                />
+
+                                                <View>
+
+                                                    <Text style={styles.commentName}>
+                                                        {comment.user.name}
+                                                    </Text>
+
+                                                    <Text style={styles.commentRole}>
+                                                        {comment.user.role}
+                                                    </Text>
+                                                    <Text style={styles.commentTime}>
+                                                        {dayjs.utc(comment.created_at).local().fromNow()}
+                                                    </Text>
+
+                                                </View>
+
+                                            </View>
+
+                                            {comment.user.id === userId && (
+
+                                                <TouchableOpacity
+                                                    onPress={() =>
+                                                        handleDeleteComment(comment.id, item.id)
+                                                    }
+                                                >
+
+                                                    <Text style={styles.commentDelete}>
+                                                        Delete
+                                                    </Text>
+
+                                                </TouchableOpacity>
+
+                                            )}
+
+                                        </View>
 
                                         <Text style={styles.commentContent}>
                                             {comment.content}
@@ -317,16 +468,20 @@ export default function CommunityScreen() {
                                 />
 
                                 <TouchableOpacity
-                                    style={styles.sendButton}
-                                    onPress={() =>
-                                        handleComment(item.id)
-                                    }
+                                    style={[
+                                        styles.sendButton,
+                                        sendingComment && { opacity: 0.7 }
+                                    ]}
+                                    onPress={() => handleComment(item.id)}
+                                    disabled={sendingComment}
                                 >
-
-                                    <Text style={styles.sendText}>
-                                        Send
-                                    </Text>
-
+                                    {sendingComment ? (
+                                        <ActivityIndicator color="white" />
+                                    ) : (
+                                        <Text style={styles.sendText}>
+                                            Send
+                                        </Text>
+                                    )}
                                 </TouchableOpacity>
 
                             </View>
@@ -533,5 +688,64 @@ const styles = StyleSheet.create({
     sendText: {
         color: COLORS.white,
         fontWeight: "bold",
+    },
+    commentHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    commentUser: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    commentAvatar: {
+        width: 35,
+        height: 35,
+        borderRadius: 18,
+        marginRight: 10,
+    },
+
+    commentRole: {
+        color: COLORS.text,
+        fontSize: 11,
+    },
+
+    commentDelete: {
+        color: "#EF4444",
+        fontWeight: "bold",
+    },
+    time: {
+        color: "#94A3B8",
+        fontSize: 11,
+        marginTop: 2,
+    },
+
+    commentTime: {
+        color: "#94A3B8",
+        fontSize: 10,
+    },
+    actionButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        backgroundColor: COLORS.primary,
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+    },
+    deleteButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+        backgroundColor: "#DC2626",
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+    },
+    iconRow: {
+        flexDirection: "row",
+        alignItems: "center",
     },
 });

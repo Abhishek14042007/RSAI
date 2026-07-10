@@ -34,9 +34,10 @@ class Resource(db.Model):
         default=0
     )
 
-    likes = db.Column(
-        db.Integer,
-        default=0
+    likes = db.relationship(
+    "ResourceLike",
+    cascade="all, delete-orphan",
+    lazy=True
     )
 
     created_at = db.Column(
@@ -64,7 +65,7 @@ class Resource(db.Model):
             "thumbnail_url": self.thumbnail_url,
             "uploaded_by": self.uploaded_by,
             "downloads": self.downloads,
-            "likes": self.likes,
+            "likes": len(self.likes),
             "comments": len(self.comments),
             "created_at": self.created_at.isoformat()
         }

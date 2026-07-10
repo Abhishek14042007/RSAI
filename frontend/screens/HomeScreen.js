@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Linking,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
@@ -20,6 +21,7 @@ export default function HomeScreen({ navigation }) {
     const [resources, setResources] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     const fetchResources = async () => {
         try {
@@ -67,6 +69,15 @@ export default function HomeScreen({ navigation }) {
         }
 
     };
+    const onRefresh = async () => {
+
+        setRefreshing(true);
+
+        await fetchResources();
+
+        setRefreshing(false);
+
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -87,13 +98,20 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1 }}>
-            <ScrollView style={styles.container}>
-
+            <ScrollView style={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={COLORS.primary}
+                    />
+                }
+            >
                 <View style={styles.header}>
 
                     <View>
                         <Text style={styles.heading}>
-                            Welcome 👋
+                            Welcome
                         </Text>
 
                         <Text style={styles.subtitle}>

@@ -80,25 +80,30 @@ def my_uploads():
     )
     
 @resources_bp.route("/<int:resource_id>/like", methods=["POST"])
+@jwt_required()
 def like_resource(resource_id):
 
-    resource = ResourceService.get_resource(resource_id)
+    result = ResourceService.like_resource(
+        resource_id,
+        int(get_jwt_identity())
+    )
 
-    if not resource:
-        return {
-            "success": False,
-            "message": "Resource not found"
-        }, 404
+    if not result:
+        return error_response(
+            "Resource not found",
+            404
+        )
 
-    resource.likes += 1
+    if result == "own_resource":
+        return error_response(
+            "You cannot like your own resource",
+            400
+        )
 
-    db.session.commit()
-
-    return {
-        "success": True,
-        "message": "Resource liked",
-        "likes": resource.likes
-    }, 200
+    return success_response(
+        "Like updated",
+        result.to_dict()
+    )
 
 @resources_bp.route("/<int:resource_id>", methods=["DELETE"])
 @jwt_required()

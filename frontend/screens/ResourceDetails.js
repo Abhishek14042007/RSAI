@@ -335,40 +335,7 @@ export default function ResourceDetails({ navigation, route }) {
 
                 </View>
 
-                {/* Tags */}
 
-                <Text style={styles.sectionTitle}>
-                    Tags
-                </Text>
-
-                <View style={styles.tagsContainer}>
-
-                    {tags.length === 0 ? (
-
-                        <Text style={styles.noTags}>
-                            No Tags
-                        </Text>
-
-                    ) : (
-
-                        tags.map((tag, index) => (
-
-                            <View
-                                key={index}
-                                style={styles.tag}
-                            >
-
-                                <Text style={styles.tagText}>
-                                    {tag.trim()}
-                                </Text>
-
-                            </View>
-
-                        ))
-
-                    )}
-
-                </View>
 
                 {/* Comments */}
 
