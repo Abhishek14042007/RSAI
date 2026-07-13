@@ -34,11 +34,11 @@ class CloudinaryService:
         return result["secure_url"]
 
     @staticmethod
-    def upload_image(image):
+    def upload_image(image, folder="RSAI/ProfilePictures"):
     
         result = cloudinary.uploader.upload(
             image,
-            folder="RSAI/ProfilePictures",
+            folder=folder,
             resource_type="image"
         )
     

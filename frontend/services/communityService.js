@@ -10,12 +10,30 @@ export const getPosts = async () => {
 
 };
 
-export const createPost = async (content) => {
+export const createPost = async (content, image) => {
 
+    const formData = new FormData();
+
+    formData.append("content", content);
+
+    if (image) {
+
+        formData.append("image", {
+            uri: image.uri,
+            name: image.fileName || "community.jpg",
+            type: image.mimeType || "image/jpeg",
+        });
+
+    }
+    console.log("Content:", content);
+    console.log("Image:", image);
     const response = await api.post(
         "/community",
+        formData,
         {
-            content,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         }
     );
 

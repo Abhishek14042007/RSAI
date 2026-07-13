@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -38,6 +39,7 @@ export default function CommunityScreen() {
     const [userId, setUserId] = useState(null);
 
     const [content, setContent] = useState("");
+    const [image, setImage] = useState(null);
     const [comments, setComments] = useState({});
 
     const [commentText, setCommentText] = useState("");
@@ -85,6 +87,39 @@ export default function CommunityScreen() {
         }
 
     };
+    const pickImage = async () => {
+
+        const permission =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permission.granted) {
+
+            Alert.alert(
+                "Permission Required",
+                "Please allow gallery access."
+            );
+
+            return;
+        }
+
+        const result =
+            await ImagePicker.launchImageLibraryAsync({
+
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+
+                quality: 0.8,
+
+                allowsEditing: true,
+
+            });
+
+        if (!result.canceled) {
+
+            setImage(result.assets[0]);
+
+        }
+
+    };
 
     useEffect(() => {
 
@@ -108,9 +143,13 @@ export default function CommunityScreen() {
 
             setPosting(true);
 
-            await createPost(content);
+            await createPost(
+                content,
+                image
+            );
 
             setContent("");
+            setImage(null);
 
             await loadPosts();
 
@@ -245,6 +284,30 @@ export default function CommunityScreen() {
                 onChangeText={setContent}
                 multiline
             />
+            <TouchableOpacity
+                style={styles.imageButton}
+                onPress={pickImage}
+            >
+
+                <Ionicons
+                    name="image"
+                    size={20}
+                    color="white"
+                />
+
+                <Text style={styles.imageButtonText}>
+                    {image ? "Change Image" : "Choose Image"}
+                </Text>
+
+            </TouchableOpacity>
+            {image && (
+
+                <Image
+                    source={{ uri: image.uri }}
+                    style={styles.preview}
+                />
+
+            )}
 
             <TouchableOpacity
                 style={[
@@ -331,6 +394,13 @@ export default function CommunityScreen() {
                         <Text style={styles.message}>
                             {item.content}
                         </Text>
+                        {item.image_url && (
+                            <Image
+                                source={{ uri: item.image_url }}
+                                style={styles.postImage}
+                                resizeMode="cover"
+                            />
+                        )}
 
                         <View style={styles.actions}>
 
@@ -747,5 +817,34 @@ const styles = StyleSheet.create({
     iconRow: {
         flexDirection: "row",
         alignItems: "center",
+    },
+    imageButton: {
+        backgroundColor: "#475569",
+        marginTop: 10,
+        borderRadius: 12,
+        padding: 14,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    imageButtonText: {
+        color: "white",
+        fontWeight: "bold",
+        marginLeft: 8,
+    },
+
+    preview: {
+        width: "100%",
+        height: 220,
+        borderRadius: 12,
+        marginTop: 15,
+        marginBottom: 10,
+    },
+    postImage: {
+        width: "100%",
+        height: 220,
+        borderRadius: 12,
+        marginTop: 12,
     },
 });

@@ -6,10 +6,11 @@ from models.post_comment import PostComment
 class CommunityService:
 
     @staticmethod
-    def create_post(content, user_id):
+    def create_post(content, image_url, user_id):
 
         post = CommunityPost(
             content=content,
+            image_url=image_url,
             user_id=user_id
         )
 

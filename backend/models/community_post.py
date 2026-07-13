@@ -15,6 +15,10 @@ class CommunityPost(db.Model):
         db.Text,
         nullable=False
     )
+    image_url = db.Column(
+    db.Text,
+    nullable=True
+    )
     comments = db.relationship(
     "PostComment",
     cascade="all, delete-orphan",
@@ -45,6 +49,7 @@ class CommunityPost(db.Model):
         return {
             "id": self.id,
             "content": self.content,
+            "image_url": self.image_url,
             "likes": len(self.likes),
             "comment_count": len(self.comments),
             "created_at": self.created_at.isoformat(),

@@ -5,30 +5,56 @@ from services.community_service import CommunityService
 from utils.response import success_response, error_response
 
 community_bp = Blueprint("community", __name__)
-@community_bp.route("/", methods=["POST"])
+@community_bp.route("", methods=["POST"])
 @jwt_required()
 def create_post():
 
-    data = request.get_json()
+    print("========== CREATE POST ==========")
+    print("FORM:", request.form)
+    print("FILES:", request.files)
 
-    content = data.get("content")
+    content = request.form.get("content")
 
     if not content:
         return error_response(
             "Post content is required"
         )
 
+    image_url = None
+
+    if "image" in request.files:
+
+        image = request.files["image"]
+
+        if image.filename != "":
+
+            print("Uploading image...")
+
+            from services.cloudinary_service import CloudinaryService
+
+            image_url = CloudinaryService.upload_image(
+                image,
+                folder="RSAI/CommunityImages"
+            )
+
+            print("Image URL:", image_url)
+
+    print("Saving post...")
+
     post = CommunityService.create_post(
         content,
+        image_url,
         int(get_jwt_identity())
     )
+
+    print("Post Saved!")
 
     return success_response(
         "Post created successfully",
         post.to_dict(),
         201
     )
-@community_bp.route("/", methods=["GET"])
+@community_bp.route("", methods=["GET"])
 def get_posts():
 
     posts = CommunityService.get_posts()
