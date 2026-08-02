@@ -1,9 +1,14 @@
 import api from "./api";
 
-export const getPosts = async () => {
+export const getPosts = async (search = "") => {
 
     const response = await api.get(
-        "/community"
+        "/community",
+        {
+            params: {
+                search,
+            },
+        }
     );
 
     return response.data;

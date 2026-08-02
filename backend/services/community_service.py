@@ -2,6 +2,7 @@ from database.db import db
 from models.community_post import CommunityPost
 from models.post_like import PostLike
 from models.post_comment import PostComment
+from models.user import User
 
 class CommunityService:
 
@@ -30,7 +31,30 @@ class CommunityService:
     def get_post(post_id):
 
         return CommunityPost.query.get(post_id)
+    @staticmethod
+    def search_posts(search):
 
+        if not search:
+
+            return CommunityPost.query.order_by(
+                CommunityPost.created_at.desc()
+            ).all()
+
+        return CommunityPost.query.join(User).filter(
+
+            db.or_(
+
+                CommunityPost.content.ilike(f"%{search}%"),
+
+                User.full_name.ilike(f"%{search}%")
+
+            )
+
+        ).order_by(
+
+            CommunityPost.created_at.desc()
+
+        ).all()
     @staticmethod
     def like_post(post_id, user_id):
     

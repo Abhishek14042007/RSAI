@@ -53,10 +53,10 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.logo}>RSAI</Text>
+            <Text style={styles.logo}>ScholarLink</Text>
 
             <Text style={styles.subtitle}>
-                Welcome Back 👋
+                Welcome Back
             </Text>
 
             <InputField

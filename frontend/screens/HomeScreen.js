@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Linking,
+    Modal,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -20,13 +22,25 @@ export default function HomeScreen({ navigation }) {
 
     const [resources, setResources] = useState([]);
     const [search, setSearch] = useState("");
+    const [filterVisible, setFilterVisible] = useState(false);
+
+    const [department, setDepartment] = useState("");
+    const [semester, setSemester] = useState("");
+    const [subject, setSubject] = useState("");
+    const [sort, setSort] = useState("latest");
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchResources = async () => {
         try {
 
-            const response = await searchResources(search);
+            const response = await searchResources(
+                search,
+                department,
+                semester,
+                subject,
+                sort
+            );
 
             setResources(response.data);
 
@@ -131,14 +145,46 @@ export default function HomeScreen({ navigation }) {
 
                 </View>
 
-                <TextInput
-                    placeholder="Search resources..."
-                    placeholderTextColor="#94A3B8"
-                    value={search}
-                    onChangeText={setSearch}
-                    onSubmitEditing={fetchResources}
-                    style={styles.search}
-                />
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 20
+                    }}
+                >
+
+                    <TextInput
+                        placeholder="Search resources..."
+                        placeholderTextColor="#94A3B8"
+                        value={search}
+                        onChangeText={setSearch}
+                        style={[
+                            styles.search,
+                            {
+                                flex: 1,
+                                marginBottom: 0
+                            }
+                        ]}
+                    />
+
+                    <TouchableOpacity
+                        style={{
+                            marginLeft: 10
+                        }}
+                        onPress={() => {
+                            setFilterVisible(true);
+                        }}
+                    >
+
+                        <Ionicons
+                            name="filter"
+                            size={26}
+                            color={COLORS.primary}
+                        />
+
+                    </TouchableOpacity>
+
+                </View>
 
                 <TouchableOpacity
                     style={styles.uploadButton}
@@ -172,7 +218,7 @@ export default function HomeScreen({ navigation }) {
                         <ResourceCard
                             key={resource.id}
                             title={resource.title}
-                            uploader={`User ${resource.uploaded_by}`}
+                            uploader={resource.uploader_name}
                             likes={resource.likes}
                             comments={resource.comments}
                             onPress={() =>
@@ -195,6 +241,134 @@ export default function HomeScreen({ navigation }) {
                     🎓
                 </Text>
             </TouchableOpacity>
+            <Modal
+                visible={filterVisible}
+                animationType="slide"
+                transparent
+            >
+
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: "flex-end",
+                        backgroundColor: "rgba(0,0,0,0.5)"
+                    }}
+                >
+
+                    <View
+                        style={{
+                            backgroundColor: COLORS.card,
+                            padding: 20,
+                            borderTopLeftRadius: 25,
+                            borderTopRightRadius: 25
+                        }}
+                    >
+
+                        <Text
+                            style={{
+                                color: "white",
+                                fontSize: 22,
+                                fontWeight: "bold",
+                                marginBottom: 20
+                            }}
+                        >
+                            Filter
+                        </Text>
+
+                        <Text style={{ color: "white" }}>Department</Text>
+
+                        <Picker
+                            selectedValue={department}
+                            onValueChange={setDepartment}
+                        >
+
+                            <Picker.Item label="All" value="" />
+                            <Picker.Item label="CSE" value="CSE" />
+                            <Picker.Item label="ECE" value="ECE" />
+                            <Picker.Item label="EEE" value="EEE" />
+
+                        </Picker>
+
+                        <Text style={{ color: "white" }}>Semester</Text>
+
+                        <Picker
+                            selectedValue={semester}
+                            onValueChange={setSemester}
+                        >
+
+                            <Picker.Item label="All" value="" />
+
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map(i =>
+
+                                <Picker.Item
+                                    key={i}
+                                    label={`${i}`}
+                                    value={`${i}`}
+                                />
+
+                            )}
+
+                        </Picker>
+
+                        <TextInput
+
+                            placeholder="Subject"
+
+                            placeholderTextColor="gray"
+
+                            value={subject}
+
+                            onChangeText={setSubject}
+
+                            style={styles.search}
+
+                        />
+
+                        <Text style={{ color: "white" }}>Sort</Text>
+
+                        <Picker
+
+                            selectedValue={sort}
+
+                            onValueChange={setSort}
+
+                        >
+
+                            <Picker.Item label="Latest" value="latest" />
+
+                            <Picker.Item label="Most Liked" value="likes" />
+
+                            <Picker.Item label="Most Downloaded" value="downloads" />
+
+                        </Picker>
+
+                        <TouchableOpacity
+
+                            style={styles.uploadButton}
+
+                            onPress={() => {
+
+                                setFilterVisible(false);
+
+                                fetchResources();
+
+                            }}
+
+                        >
+
+                            <Text style={styles.uploadButtonText}>
+
+                                Apply Filters
+
+                            </Text>
+
+                        </TouchableOpacity>
+
+                    </View>
+
+                </View>
+
+            </Modal>
 
         </View >
 

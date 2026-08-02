@@ -27,10 +27,12 @@ class Comment(db.Model):
     )
 
     def to_dict(self):
+
         return {
             "id": self.id,
             "content": self.content,
             "resource_id": self.resource_id,
             "user_id": self.user_id,
+            "user_name": self.user.full_name if self.user else "Unknown",
             "created_at": self.created_at.isoformat()
         }

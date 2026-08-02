@@ -192,7 +192,7 @@ export default function ResourceDetails({ navigation, route }) {
                         </Text>
 
                         <Text style={styles.userName}>
-                            User {resource.uploaded_by}
+                            {resource.uploader_name}
                         </Text>
 
                     </View>
@@ -260,7 +260,7 @@ export default function ResourceDetails({ navigation, route }) {
                                 style={styles.commentItem}
                             >
                                 <Text style={styles.commentUser}>
-                                    User {comment.user_id}
+                                    {comment.user_name}
                                 </Text>
 
                                 <Text style={styles.commentContent}>

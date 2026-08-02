@@ -1,5 +1,6 @@
 from database.db import db
 from datetime import datetime
+from models.user import User
 
 
 class Resource(db.Model):
@@ -64,6 +65,7 @@ class Resource(db.Model):
             "pdf_url": self.pdf_url,
             "thumbnail_url": self.thumbnail_url,
             "uploaded_by": self.uploaded_by,
+            "uploader_name": User.query.get(self.uploaded_by).full_name,
             "downloads": self.downloads,
             "likes": len(self.likes),
             "comments": len(self.comments),

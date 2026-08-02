@@ -54,8 +54,18 @@ def upload_resource():
 def get_resources():
 
     search = request.args.get("search", "")
-
-    resources = ResourceService.search_resources(search)
+    department = request.args.get("department", "")
+    semester = request.args.get("semester", "")
+    subject = request.args.get("subject", "")
+    sort = request.args.get("sort", "latest")
+    
+    resources = ResourceService.search_resources(
+        search,
+        department,
+        semester,
+        subject,
+        sort
+    )
 
     return success_response(
         "Resources fetched successfully",

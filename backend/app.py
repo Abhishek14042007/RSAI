@@ -11,11 +11,14 @@ from database.db import db
 from models.user import User
 from models.resource import Resource
 from models.comment import Comment
+from models.chat_request import ChatRequest
+from models.chat_room import ChatRoom
 
 # Import routes
 from routes.auth import auth_bp
 from routes.comments import comments_bp
 from routes.community import community_bp
+from routes.chat_request import chat_request_bp
 
 app = Flask(__name__)
 
@@ -38,6 +41,10 @@ app.register_blueprint(
 app.register_blueprint(
     community_bp,
     url_prefix="/api/community"
+)
+app.register_blueprint(
+    chat_request_bp,
+    url_prefix="/api/chat"
 )
 
 @app.route("/")

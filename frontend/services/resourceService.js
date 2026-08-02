@@ -10,11 +10,21 @@ export const likeResource = async (resourceId) => {
     return response.data;
 };
 
-export const searchResources = async (search) => {
+export const searchResources = async (
+    search,
+    department = "",
+    semester = "",
+    subject = "",
+    sort = "latest"
+) => {
 
     const response = await api.get("/resources", {
         params: {
             search,
+            department,
+            semester,
+            subject,
+            sort,
         },
     });
 

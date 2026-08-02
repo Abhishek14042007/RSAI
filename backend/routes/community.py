@@ -57,7 +57,9 @@ def create_post():
 @community_bp.route("", methods=["GET"])
 def get_posts():
 
-    posts = CommunityService.get_posts()
+    search = request.args.get("search")
+
+    posts = CommunityService.search_posts(search)
 
     return success_response(
         "Posts fetched successfully",

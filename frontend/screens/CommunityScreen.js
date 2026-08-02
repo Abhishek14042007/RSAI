@@ -39,6 +39,7 @@ export default function CommunityScreen() {
     const [userId, setUserId] = useState(null);
 
     const [content, setContent] = useState("");
+    const [search, setSearch] = useState("");
     const [image, setImage] = useState(null);
     const [comments, setComments] = useState({});
 
@@ -76,7 +77,7 @@ export default function CommunityScreen() {
 
         try {
 
-            const response = await getPosts();
+            const response = await getPosts(search);
 
             setPosts(response.data);
 
@@ -128,6 +129,17 @@ export default function CommunityScreen() {
         loadPosts();
 
     }, []);
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+
+            loadPosts();
+
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
 
     const handleCreate = async () => {
 
@@ -275,7 +287,13 @@ export default function CommunityScreen() {
             <Text style={styles.subtitle}>
                 Ask questions, share experiences and connect with alumni.
             </Text>
-
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search posts or users..."
+                placeholderTextColor="#94A3B8"
+                value={search}
+                onChangeText={setSearch}
+            />
             <TextInput
                 style={styles.input}
                 placeholder="Share something..."
@@ -291,7 +309,7 @@ export default function CommunityScreen() {
 
                 <Ionicons
                     name="image"
-                    size={20}
+                    size={16}
                     color="white"
                 />
 
@@ -411,7 +429,7 @@ export default function CommunityScreen() {
                                 <View style={styles.iconRow}>
                                     <Ionicons
                                         name="heart"
-                                        size={18}
+                                        size={15}
                                         color="#EF4444"
                                     />
 
@@ -676,8 +694,9 @@ const styles = StyleSheet.create({
 
     actions: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 18,
+        alignItems: "center",
+        justifyContent: "flex-start",
+        marginTop: 15,
     },
 
     action: {
@@ -688,16 +707,23 @@ const styles = StyleSheet.create({
     actionButton: {
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
+
         backgroundColor: COLORS.primary,
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 20,
+
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+
+        borderRadius: 16,
+
+        marginRight: 6,
     },
 
     actionText: {
         color: COLORS.white,
-        fontWeight: "bold",
-        fontSize: 14,
+        fontSize: 12,
+        fontWeight: "600",
+        marginLeft: 3,
     },
 
     delete: {
@@ -705,15 +731,25 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     deleteButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+
         backgroundColor: "#DC2626",
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 20,
+
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+
+        borderRadius: 16,
+
+        marginRight: 0,
     },
 
     deleteText: {
         color: COLORS.white,
-        fontWeight: "bold",
+        fontSize: 12,
+        fontWeight: "600",
+        marginLeft: 3,
     },
     commentSection: {
         marginTop: 15,
@@ -799,20 +835,33 @@ const styles = StyleSheet.create({
     actionButton: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        justifyContent: "center",
+
         backgroundColor: COLORS.primary,
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 20,
+
+        paddingVertical: 5,
+        paddingHorizontal: 8,
+
+        borderRadius: 14,
+
+        marginRight: 4,
+
+        transform: [{ translateX: -8 }], // moves Like & Comment slightly left
     },
+
     deleteButton: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        justifyContent: "center",
+
         backgroundColor: "#DC2626",
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 20,
+
+        paddingVertical: 5,
+        paddingHorizontal: 8,
+
+        borderRadius: 14,
+
+        marginLeft: 0,
     },
     iconRow: {
         flexDirection: "row",
@@ -846,5 +895,12 @@ const styles = StyleSheet.create({
         height: 220,
         borderRadius: 12,
         marginTop: 12,
+    },
+    searchInput: {
+        backgroundColor: COLORS.card,
+        color: COLORS.white,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 15,
     },
 });

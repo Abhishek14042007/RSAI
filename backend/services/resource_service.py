@@ -45,19 +45,53 @@ class ResourceService:
         return Resource.query.get(resource_id)
     
     @staticmethod
-    def search_resources(search):
+    def search_resources(
+        search="",
+        department="",
+        semester="",
+        subject="",
+        sort="latest"
+    ):
     
-        if not search:
-            return Resource.query.order_by(
+        query = Resource.query
+    
+        if search:
+            query = query.filter(
+                Resource.title.ilike(f"%{search}%")
+            )
+    
+        if department:
+            query = query.filter(
+                Resource.department == department
+            )
+    
+        if semester:
+            query = query.filter(
+                Resource.semester == semester
+            )
+    
+        if subject:
+            query = query.filter(
+                Resource.subject.ilike(f"%{subject}%")
+            )
+    
+        if sort == "likes":
+            query = query.order_by(
+                Resource.likes.desc()
+            )
+    
+        elif sort == "downloads":
+            query = query.order_by(
+                Resource.downloads.desc()
+            )
+    
+        else:
+            query = query.order_by(
                 Resource.created_at.desc()
-            ).all()
+            )
     
-        return Resource.query.filter(
-            Resource.title.ilike(f"%{search}%")
-        ).order_by(
-            Resource.created_at.desc()
-        ).all()
-
+        return query.all()
+    
     @staticmethod
     def get_user_resources(user_id):
     
