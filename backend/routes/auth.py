@@ -164,3 +164,19 @@ def update_profile_picture():
             "profile_picture": image_url
         }
     )
+@auth_bp.route("/users/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_user_by_id(user_id):
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return error_response(
+            "User not found",
+            404
+        )
+
+    return success_response(
+        "User profile fetched successfully",
+        user.to_dict()
+    )

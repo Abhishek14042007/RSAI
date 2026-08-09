@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 class ChatRoom(db.Model):
-
     __tablename__ = "chat_rooms"
 
     id = db.Column(
@@ -37,3 +36,21 @@ class ChatRoom(db.Model):
         "User",
         foreign_keys=[alumni_id]
     )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "student_name": (
+                self.student.full_name
+                if self.student
+                else "Unknown"
+            ),
+            "alumni_id": self.alumni_id,
+            "alumni_name": (
+                self.alumni.full_name
+                if self.alumni
+                else "Unknown"
+            ),
+            "created_at": self.created_at.isoformat()
+        }

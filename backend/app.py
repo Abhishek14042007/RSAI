@@ -13,12 +13,15 @@ from models.resource import Resource
 from models.comment import Comment
 from models.chat_request import ChatRequest
 from models.chat_room import ChatRoom
+from models.chat_message import ChatMessage
 
 # Import routes
 from routes.auth import auth_bp
 from routes.comments import comments_bp
 from routes.community import community_bp
 from routes.chat_request import chat_request_bp
+from routes.chat_messages import chat_messages_bp
+from routes.chat import chat_bp
 
 app = Flask(__name__)
 
@@ -44,6 +47,11 @@ app.register_blueprint(
 )
 app.register_blueprint(
     chat_request_bp,
+    url_prefix="/api/chat"
+)
+app.register_blueprint(chat_bp, url_prefix="/api/chat")
+app.register_blueprint(
+    chat_messages_bp,
     url_prefix="/api/chat"
 )
 

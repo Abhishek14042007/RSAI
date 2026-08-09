@@ -9,10 +9,6 @@ community_bp = Blueprint("community", __name__)
 @jwt_required()
 def create_post():
 
-    print("========== CREATE POST ==========")
-    print("FORM:", request.form)
-    print("FILES:", request.files)
-
     content = request.form.get("content")
 
     if not content:

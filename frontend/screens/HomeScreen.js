@@ -16,6 +16,8 @@ import {
 } from "react-native";
 import ResourceCard from "../components/ResourceCard";
 import COLORS from "../constants/colors";
+import { getProfile } from "../services/authService";
+import { getChatRooms } from "../services/chatService";
 import { likeResource, searchResources } from "../services/resourceService";
 
 export default function HomeScreen({ navigation }) {
@@ -30,6 +32,8 @@ export default function HomeScreen({ navigation }) {
     const [sort, setSort] = useState("latest");
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [chatRooms, setChatRooms] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     const fetchResources = async () => {
         try {
@@ -52,6 +56,24 @@ export default function HomeScreen({ navigation }) {
 
             setLoading(false);
 
+        }
+    };
+    const fetchChatRooms = async () => {
+        try {
+            const response = await getChatRooms();
+
+
+            setChatRooms(
+                response.data ||
+                response ||
+                []
+            );
+
+        } catch (error) {
+            console.log(
+                "CHAT ROOMS ERROR:",
+                error.response?.data || error.message
+            );
         }
     };
     const openPDF = async (url) => {
@@ -97,6 +119,7 @@ export default function HomeScreen({ navigation }) {
         useCallback(() => {
 
             fetchResources();
+            fetchChatRooms();
 
         }, [])
     );
@@ -109,6 +132,29 @@ export default function HomeScreen({ navigation }) {
         return () => clearTimeout(timer);
 
     }, [search]);
+    useEffect(() => {
+        const loadUserId = async () => {
+            try {
+                const response = await getProfile();
+
+                const id = response.data.id;
+
+                console.log("========== CURRENT USER ID ==========");
+                console.log(id);
+                console.log("=====================================");
+
+                setCurrentUserId(Number(id));
+
+            } catch (error) {
+                console.log(
+                    "CURRENT USER ERROR:",
+                    error.response?.data || error.message
+                );
+            }
+        };
+
+        loadUserId();
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
@@ -194,6 +240,68 @@ export default function HomeScreen({ navigation }) {
                         Upload Resource
                     </Text>
                 </TouchableOpacity>
+
+                {chatRooms.length > 0 && (
+
+                    <View style={styles.chatSection}>
+
+                        <Text style={styles.section}>
+                            Private Chats
+                        </Text>
+
+                        {chatRooms.map((room) => (
+
+                            <TouchableOpacity
+                                key={room.id}
+                                style={styles.chatCard}
+                                onPress={() =>
+                                    navigation.navigate("ChatMessages", {
+                                        roomId: room.id,
+                                        userName:
+                                            Number(room.student_id) === Number(currentUserId)
+                                                ? room.alumni_name
+                                                : room.student_name
+                                    })
+                                }
+                            >
+
+                                <View style={styles.chatIcon}>
+
+                                    <Ionicons
+                                        name="chatbubble"
+                                        size={22}
+                                        color={COLORS.white}
+                                    />
+
+                                </View>
+
+                                <View style={styles.chatInfo}>
+
+                                    <Text style={styles.chatName}>
+                                        {Number(room.student_id) === Number(currentUserId)
+                                            ? room.alumni_name
+                                            : room.student_name}
+                                    </Text>
+
+                                    <Text style={styles.chatSubtitle}>
+                                        One-to-one chat
+                                    </Text>
+
+                                </View>
+
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={COLORS.text}
+                                />
+
+                            </TouchableOpacity>
+
+                        ))}
+
+                    </View>
+
+                )}
 
                 <Text style={styles.section}>
                     Latest Resources
@@ -463,6 +571,44 @@ const styles = StyleSheet.create({
 
     fabIcon: {
         fontSize: 30,
+    },
+    chatSection: {
+        marginBottom: 10,
+    },
+
+    chatCard: {
+        backgroundColor: COLORS.card,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 10,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    chatIcon: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        backgroundColor: COLORS.primary,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    chatInfo: {
+        flex: 1,
+        marginLeft: 12,
+    },
+
+    chatName: {
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+
+    chatSubtitle: {
+        color: COLORS.text,
+        fontSize: 12,
+        marginTop: 3,
     },
 
 });

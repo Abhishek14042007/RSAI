@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
 
 export const loginUser = async (email, password) => {
@@ -60,4 +61,13 @@ export const uploadProfilePicture = async (formData) => {
     );
 
     return response.data;
+};
+export const getUserById = async (userId) => {
+    const token = await AsyncStorage.getItem("token");
+
+    return api.get(`/auth/users/${userId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };

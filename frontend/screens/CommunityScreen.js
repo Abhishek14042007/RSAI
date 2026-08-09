@@ -33,7 +33,7 @@ dayjs.extend(utc);
 import COLORS from "../constants/colors";
 
 
-export default function CommunityScreen() {
+export default function CommunityScreen({ navigation }) {
 
     const [posts, setPosts] = useState([]);
     const [userId, setUserId] = useState(null);
@@ -380,9 +380,17 @@ export default function CommunityScreen() {
 
                                 <View style={styles.nameRow}>
 
-                                    <Text style={styles.name}>
-                                        {item.user.name}
-                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            navigation.navigate("UserProfile", {
+                                                userId: item.user.id,
+                                            })
+                                        }
+                                    >
+                                        <Text style={styles.name}>
+                                            {item.user.name}
+                                        </Text>
+                                    </TouchableOpacity>
 
                                     {item.user.role === "alumni" && (
 
@@ -506,9 +514,17 @@ export default function CommunityScreen() {
 
                                                 <View>
 
-                                                    <Text style={styles.commentName}>
-                                                        {comment.user.name}
-                                                    </Text>
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            navigation.navigate("UserProfile", {
+                                                                userId: comment.user.id,
+                                                            })
+                                                        }
+                                                    >
+                                                        <Text style={styles.commentName}>
+                                                            {comment.user.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
 
                                                     <Text style={styles.commentRole}>
                                                         {comment.user.role}

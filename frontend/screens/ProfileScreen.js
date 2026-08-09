@@ -449,6 +449,20 @@ export default function ProfileScreen({ navigation }) {
 
                 </View>
                 <TouchableOpacity
+                    style={styles.chatRequestsButton}
+                    onPress={() => navigation.navigate("ChatRequests")}
+                >
+                    <Ionicons
+                        name="chatbubbles-outline"
+                        size={22}
+                        color="white"
+                    />
+
+                    <Text style={styles.chatRequestsText}>
+                        Chat Requests
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
                     style={styles.logoutButton}
                     onPress={handleLogout}
                 >
@@ -655,6 +669,22 @@ const styles = StyleSheet.create({
     },
 
     logoutText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 10,
+    },
+    chatRequestsButton: {
+        marginTop: 20,
+        backgroundColor: COLORS.primary,
+        borderRadius: 12,
+        padding: 15,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    chatRequestsText: {
         color: "white",
         fontSize: 16,
         fontWeight: "bold",

@@ -2,12 +2,19 @@ from database.db import db
 from datetime import datetime
 
 
-class ChatRequest(db.Model):
-    __tablename__ = "chat_requests"
+class ChatMessage(db.Model):
+
+    __tablename__ = "chat_messages"
 
     id = db.Column(
         db.Integer,
         primary_key=True
+    )
+
+    room_id = db.Column(
+        db.Integer,
+        db.ForeignKey("chat_rooms.id"),
+        nullable=False
     )
 
     sender_id = db.Column(
@@ -16,15 +23,8 @@ class ChatRequest(db.Model):
         nullable=False
     )
 
-    receiver_id = db.Column(
-        db.Integer,
-        db.ForeignKey("users.id"),
-        nullable=False
-    )
-
-    status = db.Column(
-        db.String(20),
-        default="pending",
+    content = db.Column(
+        db.Text,
         nullable=False
     )
 
@@ -38,18 +38,19 @@ class ChatRequest(db.Model):
         foreign_keys=[sender_id]
     )
 
-    receiver = db.relationship(
-        "User",
-        foreign_keys=[receiver_id]
+    room = db.relationship(
+        "ChatRoom",
+        foreign_keys=[room_id]
     )
 
     def to_dict(self):
+
         return {
             "id": self.id,
+            "room_id": self.room_id,
             "sender_id": self.sender_id,
             "sender_name": self.sender.full_name if self.sender else "Unknown",
             "sender_role": self.sender.role if self.sender else None,
-            "receiver_id": self.receiver_id,
-            "status": self.status,
+            "content": self.content,
             "created_at": self.created_at.isoformat()
         }

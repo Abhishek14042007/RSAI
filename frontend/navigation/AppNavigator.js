@@ -1,6 +1,11 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import AlumniScreen from "../screens/AlumniScreen";
+import ChatListScreen from "../screens/ChatListScreen";
+import ChatMessagesScreen from "../screens/ChatMessagesScreen";
+import ChatRequestsScreen from "../screens/ChatRequestsScreen";
+import ChatScreen from "../screens/ChatScreen";
 import CommunityScreen from "../screens/CommunityScreen";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -9,6 +14,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import ResourceDetails from "../screens/ResourceDetails";
 import SearchScreen from "../screens/SearchScreen";
 import UploadScreen from "../screens/UploadScreen";
+import UserProfileScreen from "../screens/UserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +39,33 @@ export default function AppNavigator() {
                 <Stack.Screen
                     name="Community"
                     component={CommunityScreen}
+                />
+                <Stack.Screen
+                    name="Alumni"
+                    component={AlumniScreen}
+                />
+                <Stack.Screen
+                    name="ChatRequests"
+                    component={ChatRequestsScreen}
+                />
+                <Stack.Screen
+                    name="ChatList"
+                    component={ChatListScreen}
+                />
+                <Stack.Screen
+                    name="Chat"
+                    component={ChatScreen}
+                />
+                <Stack.Screen
+                    name="ChatMessages"
+                    component={ChatMessagesScreen}
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="UserProfile"
+                    component={UserProfileScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>
