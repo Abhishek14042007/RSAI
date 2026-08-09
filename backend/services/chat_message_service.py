@@ -49,3 +49,21 @@ class ChatMessageService:
         db.session.commit()
 
         return message
+    @staticmethod
+    def delete_message(message_id, user_id):
+    
+        message = ChatMessage.query.filter_by(
+            id=message_id
+        ).first()
+    
+        if not message:
+            return None
+    
+        # Only the person who sent the message can delete it
+        if message.sender_id != user_id:
+            return "forbidden"
+    
+        db.session.delete(message)
+        db.session.commit()
+    
+        return message

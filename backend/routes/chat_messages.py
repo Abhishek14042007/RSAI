@@ -76,3 +76,32 @@ def send_message(room_id):
         message.to_dict(),
         201
     )
+@chat_messages_bp.route(
+    "/rooms/<int:room_id>/messages/<int:message_id>",
+    methods=["DELETE"]
+)
+@jwt_required()
+def delete_message(room_id, message_id):
+
+    user_id = int(get_jwt_identity())
+
+    message = ChatMessageService.delete_message(
+        message_id,
+        user_id
+    )
+
+    if message is None:
+        return error_response(
+            "Message not found",
+            404
+        )
+
+    if message == "forbidden":
+        return error_response(
+            "You can only delete your own messages",
+            403
+        )
+
+    return success_response(
+        "Message deleted successfully"
+    )

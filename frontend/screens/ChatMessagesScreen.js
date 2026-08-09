@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     KeyboardAvoidingView,
     Platform,
@@ -10,7 +11,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 
 import COLORS from "../constants/colors";
@@ -137,6 +138,50 @@ export default function ChatMessagesScreen({ route, navigation }) {
 
         }
     };
+    const deleteMessage = (messageId) => {
+
+        Alert.alert(
+            "Delete Message",
+            "Are you sure you want to delete this message?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+
+                        try {
+
+                            await api.delete(
+                                `/chat/rooms/${roomId}/messages/${messageId}`
+                            );
+
+                            await fetchMessages();
+
+                        } catch (error) {
+
+                            console.log(
+                                "DELETE MESSAGE ERROR:",
+                                error.response?.data ||
+                                error.message
+                            );
+
+                            Alert.alert(
+                                "Error",
+                                error.response?.data?.message ||
+                                "Unable to delete message."
+                            );
+
+                        }
+
+                    },
+                },
+            ]
+        );
+    };
 
     const renderMessage = ({ item }) => {
 
@@ -162,31 +207,40 @@ export default function ChatMessagesScreen({ route, navigation }) {
                 ]}
             >
 
-                <View
-                    style={[
-                        styles.messageBubble,
-                        isMine
-                            ? styles.myMessageBubble
-                            : styles.theirMessageBubble,
-                    ]}
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onLongPress={() => {
+                        if (isMine) {
+                            deleteMessage(item.id);
+                        }
+                    }}
                 >
+                    <View
+                        style={[
+                            styles.messageBubble,
+                            isMine
+                                ? styles.myMessageBubble
+                                : styles.theirMessageBubble,
+                        ]}
+                    >
 
-                    <Text style={styles.messageText}>
-                        {item.content}
-                    </Text>
-
-                    {item.created_at && (
-                        <Text style={styles.time}>
-                            {new Date(
-                                item.created_at
-                            ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
+                        <Text style={styles.messageText}>
+                            {item.content}
                         </Text>
-                    )}
 
-                </View>
+                        {item.created_at && (
+                            <Text style={styles.time}>
+                                {new Date(
+                                    item.created_at
+                                ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </Text>
+                        )}
+
+                    </View>
+                </TouchableOpacity>
 
             </View>
         );
