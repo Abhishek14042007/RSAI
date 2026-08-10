@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import AdminScreen from "../screens/AdminScreen";
 import AlumniScreen from "../screens/AlumniScreen";
 import ChatListScreen from "../screens/ChatListScreen";
 import ChatMessagesScreen from "../screens/ChatMessagesScreen";
@@ -66,6 +67,10 @@ export default function AppNavigator() {
                 <Stack.Screen
                     name="UserProfile"
                     component={UserProfileScreen}
+                />
+                <Stack.Screen
+                    name="Admin"
+                    component={AdminScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>

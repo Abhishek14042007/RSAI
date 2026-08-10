@@ -37,7 +37,11 @@ export default function LoginScreen({ navigation }) {
 
                 //Alert.alert("Success", response.message);
 
-                navigation.replace("Home");
+                if (response.data.user.role === "admin") {
+                    navigation.replace("Admin");
+                } else {
+                    navigation.replace("Home");
+                }
             } else {
                 Alert.alert("Login Failed", response.message);
             }

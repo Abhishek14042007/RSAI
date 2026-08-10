@@ -22,6 +22,7 @@ from routes.community import community_bp
 from routes.chat_request import chat_request_bp
 from routes.chat_messages import chat_messages_bp
 from routes.chat import chat_bp
+from routes.admin import admin_bp
 
 app = Flask(__name__)
 
@@ -53,6 +54,10 @@ app.register_blueprint(chat_bp, url_prefix="/api/chat")
 app.register_blueprint(
     chat_messages_bp,
     url_prefix="/api/chat"
+)
+app.register_blueprint(
+    admin_bp,
+    url_prefix="/api/admin"
 )
 
 @app.route("/")
