@@ -46,6 +46,9 @@ export default function LoginScreen({ navigation }) {
                 Alert.alert("Login Failed", response.message);
             }
         } catch (error) {
+            console.log("LOGIN ERROR:", error);
+            console.log("LOGIN ERROR MESSAGE:", error.message);
+            console.log("LOGIN ERROR RESPONSE:", error.response?.data);
             Alert.alert(
                 "Error",
                 error.response?.data?.message || "Unable to connect to server."
