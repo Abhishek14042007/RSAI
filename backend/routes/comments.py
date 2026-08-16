@@ -54,7 +54,7 @@ def add_comment(resource_id):
 @jwt_required()
 def delete_comment(comment_id):
 
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
     comment = Comment.query.get(comment_id)
 
