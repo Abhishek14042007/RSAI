@@ -14,13 +14,19 @@ import {
 } from "react-native";
 import { downloadResource } from "../services/resourceService";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import COLORS from "../constants/colors";
-import { addComment, getComments } from "../services/commentService";
+import {
+    addComment,
+    deleteComment,
+    getComments,
+} from "../services/commentService";
 export default function ResourceDetails({ navigation, route }) {
 
     const { resource } = route.params;
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState("");
+    const [currentUser, setCurrentUser] = useState(null);
 
     const loadComments = async () => {
         try {
@@ -85,9 +91,21 @@ export default function ResourceDetails({ navigation, route }) {
         }
 
     };
+    const loadCurrentUser = async () => {
+        try {
+            const storedUser = await AsyncStorage.getItem("user");
+
+            if (storedUser) {
+                setCurrentUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.log("USER LOAD ERROR:", error);
+        }
+    };
 
     useEffect(() => {
         loadComments();
+        loadCurrentUser();
     }, []);
 
     const openPDF = async () => {
@@ -106,6 +124,35 @@ export default function ResourceDetails({ navigation, route }) {
             console.log(error);
 
         }
+    };
+    const handleDeleteComment = (comment) => {
+        Alert.alert(
+            "Delete Comment",
+            "Are you sure you want to delete this comment?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await deleteComment(comment.id);
+                            loadComments();
+                        } catch (error) {
+                            console.log("DELETE COMMENT ERROR:", error);
+                            Alert.alert(
+                                "Error",
+                                error.response?.data?.message ||
+                                "Unable to delete comment."
+                            );
+                        }
+                    },
+                },
+            ]
+        );
     };
 
 
@@ -254,20 +301,44 @@ export default function ResourceDetails({ navigation, route }) {
                             No comments yet.
                         </Text>
                     ) : (
-                        comments.map((comment) => (
-                            <View
-                                key={comment.id}
-                                style={styles.commentItem}
-                            >
-                                <Text style={styles.commentUser}>
-                                    {comment.user_name}
-                                </Text>
+                        comments.map((comment) => {
+                            const canDelete =
+                                currentUser &&
+                                (
+                                    comment.user_id === currentUser.id ||
+                                    resource.uploaded_by === currentUser.id ||
+                                    currentUser.role === "admin"
+                                );
 
-                                <Text style={styles.commentContent}>
-                                    {comment.content}
-                                </Text>
-                            </View>
-                        ))
+                            return (
+                                <View
+                                    key={comment.id}
+                                    style={styles.commentItem}
+                                >
+                                    <View style={styles.commentHeader}>
+                                        <Text style={styles.commentUser}>
+                                            {comment.user_name}
+                                        </Text>
+
+                                        {canDelete && (
+                                            <TouchableOpacity
+                                                onPress={() => handleDeleteComment(comment)}
+                                            >
+                                                <Ionicons
+                                                    name="trash-outline"
+                                                    size={20}
+                                                    color="#EF4444"
+                                                />
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+
+                                    <Text style={styles.commentContent}>
+                                        {comment.content}
+                                    </Text>
+                                </View>
+                            );
+                        })
                     )}
 
                     <TextInput
@@ -600,6 +671,12 @@ const styles = StyleSheet.create({
         borderBottomColor: "#2E3A59",
         paddingBottom: 12,
         marginBottom: 12,
+    },
+    commentHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 5,
     },
 
     commentUser: {
